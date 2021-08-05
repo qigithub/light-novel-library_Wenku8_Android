@@ -2,7 +2,12 @@
 
 buildscript {
     repositories {
-        jcenter()
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://repo.huaweicloud.com/repository/maven' }
+        maven { url 'https://jitpack.io' }
+        mavenCentral()
         google()
         maven { url 'https://dl.bintray.com/umsdk/release' }
     }
@@ -17,15 +22,18 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url "https://maven.google.com" }
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://repo.huaweicloud.com/repository/maven' }
         maven { url 'https://jitpack.io' }
-        maven { url 'https://dl.bintray.com/umsdk/release' }
-        jcenter()
+        mavenCentral()
         google()
+        maven { url 'https://dl.bintray.com/umsdk/release' }
     }
 }
 
 ext {
     targetSdkVersion = 29
-    buildToolsVersion = "29.0.2"
+    buildToolsVersion = "30.0.2"
 }
