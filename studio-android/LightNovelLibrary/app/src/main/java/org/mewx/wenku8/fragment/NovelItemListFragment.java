@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
 import com.google.android.material.snackbar.Snackbar;
+import com.nostra13.universalimageloader.utils.L;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
@@ -105,7 +107,9 @@ public class NovelItemListFragment extends Fragment implements MyItemClickListen
 
         // init values
         listNovelItemAid = null;
+        listNovelItemAid = new ArrayList<>(32);
         listNovelItemInfo = null;
+        listNovelItemInfo = new ArrayList<>(32);
         currentPage = 1; // default 1
         totalPage = 0; // default 0
 
@@ -118,6 +122,13 @@ public class NovelItemListFragment extends Fragment implements MyItemClickListen
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
+        if(mAdapter == null) {
+            mAdapter = new NovelItemAdapterUpdate();
+        }
+        mAdapter.setOnItemClickListener(this);
+        mAdapter.setOnItemLongClickListener(this);
+        mRecyclerView.setAdapter(mAdapter);
+        mAdapter.RefreshDataset(listNovelItemInfo);
         // List request
         if(type.equals(searchType)) {
             // update UI
@@ -211,18 +222,32 @@ public class NovelItemListFragment extends Fragment implements MyItemClickListen
             listNovelItemInfo.add(new NovelItemInfoUpdate(temp));
         }
 
-        if(mAdapter == null) {
-            mAdapter = new NovelItemAdapterUpdate();
-            mAdapter.setOnItemClickListener(this);
-            mAdapter.setOnItemLongClickListener(this);
-        }
+//        if(mAdapter == null) {
+//            mAdapter = new NovelItemAdapterUpdate();
+//            mAdapter.setOnItemClickListener(this);
+//            mAdapter.setOnItemLongClickListener(this);
+//        }
         mAdapter.RefreshDataset(listNovelItemInfo);
 
-        if(currentPage == 1 && mRecyclerView != null) {
-            mRecyclerView.setAdapter(mAdapter);
-        }
-        else
+//        if(currentPage == 1 && mRecyclerView != null) {
+//            mRecyclerView.setAdapter(mAdapter);
+//        }
+//        else
             mAdapter.notifyDataSetChanged();
+        Log.e("refreshIdList","mAdapter size ="+mAdapter.getItemCount() );
+    }
+
+    /**
+     * 向底部添加一部分新list,不会全部覆盖
+     * @param integerList
+     */
+    private void addNextPageData(List<Integer> integerList){
+        List<NovelItemInfoUpdate> list = new ArrayList<>(16);
+        for(Integer temp : integerList) {
+            list.add(new NovelItemInfoUpdate(temp));
+        }
+        mAdapter.addDataset(list);
+        mAdapter.notifyDataSetChanged();
     }
 
     private void appendToIdList(List<Integer> l) {
@@ -244,7 +269,7 @@ public class NovelItemListFragment extends Fragment implements MyItemClickListen
 
             if (!isLoading) {
                 // 滚动到一半的时候加载，即：剩余2个元素的时候就加载
-                if (visibleItemCount + pastVisiblesItems + 2 >= totalItemCount && (totalPage==0 || currentPage < totalPage)) {
+                if (visibleItemCount + pastVisiblesItems + 0 >= totalItemCount && (totalPage==0 || currentPage < totalPage)) {
                     // load more toast
                     Snackbar.make(mRecyclerView, getResources().getString(R.string.list_loading)
                                     + "(" + Integer.toString(currentPage + 1) + "/" + Integer.toString(totalPage) + ")",
@@ -311,6 +336,7 @@ public class NovelItemListFragment extends Fragment implements MyItemClickListen
 
             totalPage = tempNovelList.get(0);
             tempNovelList.remove(0);
+            Log.e("AsyncGetNovelItemList","tempNovelList size ="+tempNovelList.size());
             return 0;
         }
 
@@ -327,9 +353,11 @@ public class NovelItemListFragment extends Fragment implements MyItemClickListen
 
             // add to total list
             appendToIdList(tempNovelList);
+            addNextPageData(tempNovelList);
             tempNovelList = null;
 
-            refreshIdList();
+//            refreshIdList();
+
             isLoading = false;
 
             if (usingWenku8Relay) {
@@ -382,7 +410,8 @@ public class NovelItemListFragment extends Fragment implements MyItemClickListen
             }
 
             // set migrate
-            listNovelItemAid = new ArrayList<>();
+            if (listNovelItemAid == null)
+                listNovelItemAid = new ArrayList<>();
             listNovelItemAid.addAll(listResultList);
             listNovelItemAid.removeAll(listResultList2);
             listNovelItemAid.addAll(listResultList2);

@@ -38,31 +38,41 @@ public class NovelItemAdapterUpdate extends RecyclerView.Adapter<NovelItemAdapte
     private MyItemClickListener mItemClickListener;
     private MyOptionClickListener mMyOptionClickListener;
     private MyItemLongClickListener mItemLongClickListener;
-    private List<NovelItemInfoUpdate> mDataset = new ArrayList<>(16);
+    private List<NovelItemInfoUpdate> mDataset = new ArrayList<>(32);
 
     // empty list, then use append method to add list elements
     public NovelItemAdapterUpdate() {
-        mDataset = new ArrayList<>(16);
+        if (mDataset == null)
+            mDataset = new ArrayList<>(32);
     }
 
     public NovelItemAdapterUpdate(List<NovelItemInfoUpdate> dataset) {
         super();
-        if (mDataset != null) {
-            mDataset.clear();
-            if (dataset!=null)
-                mDataset.addAll(dataset);
-        }else
-            mDataset = dataset;
+        if (mDataset == null)
+            mDataset = new ArrayList<>(32);
+        mDataset.clear();
+        if (dataset != null) {
+            mDataset.addAll(dataset);
+        }
     }
 
     public void RefreshDataset(List<NovelItemInfoUpdate> dataset) {
 
-        if (mDataset != null) {
-            mDataset.clear();
-            if (dataset!=null)
-                mDataset.addAll(dataset);
-        }else
-            mDataset = dataset;
+        if (mDataset == null)
+            mDataset = new ArrayList<>(32);
+        mDataset.clear();
+        if (dataset != null) {
+            mDataset.addAll(dataset);
+        }
+    }
+
+    public void addDataset(List<NovelItemInfoUpdate> dataset) {
+
+        if (mDataset == null)
+            mDataset = new ArrayList<>(32);
+        if (dataset != null) {
+            mDataset.addAll(dataset);
+        }
     }
 
 
@@ -246,8 +256,15 @@ public class NovelItemAdapterUpdate extends RecyclerView.Adapter<NovelItemAdapte
 
             if(errorCode == Wenku8Error.ErrorCode.SYSTEM_1_SUCCEEDED) {
                 // update info
-                mDataset.set(aid,NovelItemInfoUpdate.parse(novelIntro));
-                refreshAllContent(vh, aid);
+                NovelItemInfoUpdate itemInfoUpdate = NovelItemInfoUpdate.parse(novelIntro);
+                if (itemInfoUpdate != null ) {
+                    if (!itemInfoUpdate.title.equals(mDataset.get(aid).title)) {
+                        mDataset.set(aid,NovelItemInfoUpdate.parse(novelIntro));
+                        NovelItemAdapterUpdate.this.notifyItemChanged(aid);
+                    }
+                }
+
+//                refreshAllContent(vh, aid);
             }
             vh.isLoading = false;
         }

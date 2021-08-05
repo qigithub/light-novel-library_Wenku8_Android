@@ -43,6 +43,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 最近更新
+ */
 public class LatestFragment extends Fragment implements MyItemClickListener, MyItemLongClickListener {
 
     static private final String TAG = "LatestFragment";
@@ -118,6 +121,14 @@ public class LatestFragment extends Fragment implements MyItemClickListener, MyI
 
         // Listener
         mRecyclerView.addOnScrollListener(new MyOnScrollListener());
+        if (listNovelItemInfo==null)
+            listNovelItemInfo = new ArrayList<>(16);
+        if (mAdapter == null) {
+            mAdapter = new NovelItemAdapter(listNovelItemInfo);
+        }
+        mAdapter.setOnItemClickListener(LatestFragment.this);
+        mAdapter.setOnItemLongClickListener(LatestFragment.this);
+        mRecyclerView.setAdapter(mAdapter);
 
         // set click event
         btn_loading.setOnClickListener(v -> {
@@ -131,14 +142,7 @@ public class LatestFragment extends Fragment implements MyItemClickListener, MyI
                 loadNovelList(currentPage);
             }
         });
-        if (listNovelItemInfo==null)
-            listNovelItemInfo = new ArrayList<>(16);
-        if (mAdapter == null) {
-            mAdapter = new NovelItemAdapter(listNovelItemInfo);
-        }
-        mAdapter.setOnItemClickListener(LatestFragment.this);
-        mAdapter.setOnItemLongClickListener(LatestFragment.this);
-        mRecyclerView.setAdapter(mAdapter);
+
 
         // fetch novel list
         currentPage = 1;
@@ -305,6 +309,7 @@ public class LatestFragment extends Fragment implements MyItemClickListener, MyI
 //                mAdapter.setOnItemLongClickListener(LatestFragment.this);
 //                mRecyclerView.setAdapter(mAdapter);
             }
+            mAdapter.RefreshDataset(listNovelItemInfo);
             if (list_loading!= null)
                 list_loading.setVisibility(View.GONE);
             mAdapter.notifyDataSetChanged();

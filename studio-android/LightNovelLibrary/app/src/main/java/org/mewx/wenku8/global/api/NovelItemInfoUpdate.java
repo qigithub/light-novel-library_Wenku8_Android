@@ -17,7 +17,7 @@ public class NovelItemInfoUpdate {
 
     // Variables
     public int aid;
-    public String title;
+    public String title="";
     public String author = LOADING_STRING;
     public String status = LOADING_STRING;
     public String update = LOADING_STRING; // last update time
