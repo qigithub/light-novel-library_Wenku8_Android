@@ -31,7 +31,17 @@ android {
             }
         }
     }
+    signingConfigs {
+        debug {
+            storeFile file('yunhen.ks')
+            storePassword "yunhen"
+            keyAlias "yunhen"
+            keyPassword "yunhen"
+        }
+    }
+
     flavorDimensions "default"
+
     productFlavors {
         alpha {
             // 内测渠道，群分发
@@ -66,6 +76,23 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    android.applicationVariants.all {
+        variant ->
+            variant.outputs.all {
+//                def date = new Date()
+//                def dateStr = date.format('yyyyMMdd')
+                def fileName
+                if (variant.buildType.name.equals('debug')) {
+                    fileName = "debug.apk"
+                } else {
+                    //这里修改apk文件名
+                    fileName = "${variant.name}_${variant.versionName}_${variant.versionCode}.apk"
+//                    fileName = "${variant.name}_${variant.versionName}_${variant.versionCode}_64.apk"
+                }
+                outputFileName = fileName
+
+            }
     }
 }
 
