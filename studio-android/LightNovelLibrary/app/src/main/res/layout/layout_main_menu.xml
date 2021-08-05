@@ -21,12 +21,19 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <View
+                android:id="@+id/view_top"
+                android:layout_alignParentTop="true"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:background="@color/menu_item_blue_dark"
+                />
             <!-- Top part -->
             <RelativeLayout
                 android:id="@+id/top_background"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
+                android:layout_below="@id/view_top"
                 android:layout_centerHorizontal="true"
                 android:gravity="bottom"
                 android:fitsSystemWindows="true"
@@ -36,7 +43,7 @@
                 <ImageView
                     android:id="@+id/bg_img"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="240dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/bg_avatar_05"
                     android:layout_alignParentTop="true"
@@ -44,8 +51,8 @@
 
                 <com.makeramen.roundedimageview.RoundedImageView
                     android:id="@+id/user_avatar"
-                    android:layout_height="48dp"
-                    android:layout_width="48dp"
+                    android:layout_height="60dp"
+                    android:layout_width="60dp"
                     android:src="@drawable/ic_noavatar"
                     android:scaleType="fitXY"
                     app:riv_corner_radius="24dp"
@@ -64,7 +71,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/main_menu_not_login"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textColor="@color/avatar_text"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"

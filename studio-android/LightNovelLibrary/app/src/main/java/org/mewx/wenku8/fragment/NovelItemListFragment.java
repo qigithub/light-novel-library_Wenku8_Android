@@ -67,6 +67,7 @@ public class NovelItemListFragment extends Fragment implements MyItemClickListen
     // page info
     private int currentPage = 1; // default 1
     private int totalPage = 0; // default 0
+    private TextView relay_warning;
 
     public static NovelItemListFragment newInstance(Bundle args) {
         NovelItemListFragment fragment = new NovelItemListFragment();
@@ -90,7 +91,8 @@ public class NovelItemListFragment extends Fragment implements MyItemClickListen
         rootView.setTag(type); // set TAG
 
         // Set warning message.
-        rootView.findViewById(R.id.relay_warning).setOnClickListener(view -> new MaterialDialog.Builder(getContext())
+        relay_warning = rootView.findViewById(R.id.relay_warning);
+        relay_warning.setOnClickListener(view -> new MaterialDialog.Builder(getContext())
                 .theme(Theme.LIGHT)
                 .backgroundColorRes(R.color.dlgBackgroundColor)
                 .contentColorRes(R.color.dlgContentColor)
@@ -331,9 +333,9 @@ public class NovelItemListFragment extends Fragment implements MyItemClickListen
             isLoading = false;
 
             if (usingWenku8Relay) {
-                getActivity().findViewById(R.id.relay_warning).setVisibility(View.VISIBLE);
+                relay_warning.setVisibility(View.VISIBLE);
             } else {
-                getActivity().findViewById(R.id.relay_warning).setVisibility(View.GONE);
+                relay_warning.setVisibility(View.GONE);
             }
         }
     }

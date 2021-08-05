@@ -38,20 +38,31 @@ public class NovelItemAdapterUpdate extends RecyclerView.Adapter<NovelItemAdapte
     private MyItemClickListener mItemClickListener;
     private MyOptionClickListener mMyOptionClickListener;
     private MyItemLongClickListener mItemLongClickListener;
-    private List<NovelItemInfoUpdate> mDataset;
+    private List<NovelItemInfoUpdate> mDataset = new ArrayList<>(16);
 
     // empty list, then use append method to add list elements
     public NovelItemAdapterUpdate() {
-        mDataset = new ArrayList<>();
+        mDataset = new ArrayList<>(16);
     }
 
     public NovelItemAdapterUpdate(List<NovelItemInfoUpdate> dataset) {
         super();
-        mDataset = dataset;
+        if (mDataset != null) {
+            mDataset.clear();
+            if (dataset!=null)
+                mDataset.addAll(dataset);
+        }else
+            mDataset = dataset;
     }
 
     public void RefreshDataset(List<NovelItemInfoUpdate> dataset) {
-        mDataset = dataset;
+
+        if (mDataset != null) {
+            mDataset.clear();
+            if (dataset!=null)
+                mDataset.addAll(dataset);
+        }else
+            mDataset = dataset;
     }
 
 

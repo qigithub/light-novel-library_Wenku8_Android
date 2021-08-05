@@ -20,9 +20,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jpardogo.android.googleprogressbar.library.GoogleProgressBar;
 import com.umeng.analytics.MobclickAgent;
 
 import org.mewx.wenku8.R;
@@ -59,6 +61,8 @@ public class LatestFragment extends Fragment implements MyItemClickListener, MyI
     // switcher
     private boolean isLoading;
     int pastVisibleItems, visibleItemCount, totalItemCount;
+    private TextView relay_warning;
+    private LinearLayout list_loading;
 
     public LatestFragment() {
         // Required empty public constructor
@@ -88,7 +92,8 @@ public class LatestFragment extends Fragment implements MyItemClickListener, MyI
         View rootView = inflater.inflate(R.layout.fragment_latest, container, false);
 
         // Set warning message.
-        rootView.findViewById(R.id.relay_warning).setOnClickListener(view -> new MaterialDialog.Builder(getContext())
+        relay_warning = rootView.findViewById(R.id.relay_warning);
+        relay_warning.setOnClickListener(view -> new MaterialDialog.Builder(getContext())
                 .theme(Theme.LIGHT)
                 .backgroundColorRes(R.color.dlgBackgroundColor)
                 .contentColorRes(R.color.dlgContentColor)
@@ -99,6 +104,9 @@ public class LatestFragment extends Fragment implements MyItemClickListener, MyI
                 .positiveText(R.string.dialog_positive_ok)
                 .show());
 
+        list_loading = rootView.findViewById(R.id.list_loading);
+        google_progress = rootView.findViewById(R.id.google_progress);
+        btn_loading = rootView.findViewById(R.id.btn_loading);
         // get views
         mRecyclerView = rootView.findViewById(R.id.novel_item_list);
         mTextView = rootView.findViewById(R.id.list_loading_status);
@@ -112,7 +120,7 @@ public class LatestFragment extends Fragment implements MyItemClickListener, MyI
         mRecyclerView.addOnScrollListener(new MyOnScrollListener());
 
         // set click event
-        rootView.findViewById(R.id.btn_loading).setOnClickListener(v -> {
+        btn_loading.setOnClickListener(v -> {
             if (isLoading) {
                 isLoading = false; // set this false as a terminator signal
             } else {
@@ -123,6 +131,14 @@ public class LatestFragment extends Fragment implements MyItemClickListener, MyI
                 loadNovelList(currentPage);
             }
         });
+        if (listNovelItemInfo==null)
+            listNovelItemInfo = new ArrayList<>(16);
+        if (mAdapter == null) {
+            mAdapter = new NovelItemAdapter(listNovelItemInfo);
+        }
+        mAdapter.setOnItemClickListener(LatestFragment.this);
+        mAdapter.setOnItemLongClickListener(LatestFragment.this);
+        mRecyclerView.setAdapter(mAdapter);
 
         // fetch novel list
         currentPage = 1;
@@ -285,21 +301,21 @@ public class LatestFragment extends Fragment implements MyItemClickListener, MyI
             // hide loading layout
             if (mAdapter == null) {
                 mAdapter = new NovelItemAdapter(listNovelItemInfo);
-                mAdapter.setOnItemClickListener(LatestFragment.this);
-                mAdapter.setOnItemLongClickListener(LatestFragment.this);
-                mRecyclerView.setAdapter(mAdapter);
+//                mAdapter.setOnItemClickListener(LatestFragment.this);
+//                mAdapter.setOnItemLongClickListener(LatestFragment.this);
+//                mRecyclerView.setAdapter(mAdapter);
             }
-            if (mainActivity.findViewById(R.id.list_loading) != null)
-                mainActivity.findViewById(R.id.list_loading).setVisibility(View.GONE);
+            if (list_loading!= null)
+                list_loading.setVisibility(View.GONE);
             mAdapter.notifyDataSetChanged();
 
             currentPage ++; // add when loaded
             isLoading = false;
 
             if (usingWenku8Relay) {
-                mainActivity.findViewById(R.id.relay_warning).setVisibility(View.VISIBLE);
+                relay_warning.setVisibility(View.VISIBLE);
             } else {
-                mainActivity.findViewById(R.id.relay_warning).setVisibility(View.GONE);
+                relay_warning.setVisibility(View.GONE);
             }
         }
     }
@@ -318,21 +334,24 @@ public class LatestFragment extends Fragment implements MyItemClickListener, MyI
         GlobalConfig.EnterLatest();
     }
 
+    private GoogleProgressBar google_progress;
+    private TextView btn_loading;
+
     private void showRetryButton() {
-        if (mainActivity.findViewById(R.id.btn_loading) == null || !isAdded()) return;
-        ((TextView) mainActivity.findViewById(R.id.btn_loading)).setText(getResources().getString(R.string.task_retry));
-        mainActivity.findViewById(R.id.google_progress).setVisibility(View.GONE);
-        mainActivity.findViewById(R.id.btn_loading).setVisibility(View.VISIBLE);
+        if (btn_loading == null || !isAdded()) return;
+        btn_loading.setText(getResources().getString(R.string.task_retry));
+        google_progress.setVisibility(View.GONE);
+        btn_loading.setVisibility(View.VISIBLE);
     }
 
     /**
      * After button pressed, should hide the "retry" button
      */
     private void hideRetryButton() {
-        if (mainActivity.findViewById(R.id.btn_loading) == null) return;
+        if (btn_loading == null) return;
         mTextView.setText(getResources().getString(R.string.list_loading));
-        mainActivity.findViewById(R.id.google_progress).setVisibility(View.VISIBLE);
-        mainActivity.findViewById(R.id.btn_loading).setVisibility(View.GONE);
+        google_progress.setVisibility(View.VISIBLE);
+        btn_loading.setVisibility(View.GONE);
     }
 
 

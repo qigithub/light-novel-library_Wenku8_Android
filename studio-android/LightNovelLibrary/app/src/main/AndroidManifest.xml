@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+<!--    <uses-permission android:name="android.permission.WAKE_LOCK" />-->
     <uses-permission android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -31,6 +31,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:requestLegacyExternalStorage="true"
         android:theme="@style/AppTheme"
+        android:resizeableActivity="true"
         tools:replace="android:label">
 
         <!-- UMeng Mob Statistics -->
@@ -41,6 +42,7 @@
         <activity
             android:name=".activity.MainActivity"
             android:label="@string/app_name"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
 
             <intent-filter>
@@ -52,84 +54,98 @@
         <!-- Search Activity -->
         <activity android:name=".activity.SearchActivity"
             android:label="@string/action_search"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- Search Result Activity -->
         <activity android:name=".activity.SearchResultActivity"
             android:label="@string/action_search"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- Novel Info Activity -->
         <activity android:name=".activity.NovelInfoActivity"
             android:label="@string/action_novel_info"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- Novel Chapter List Activity -->
         <activity android:name=".activity.NovelChapterActivity"
             android:label="@string/action_chapter_list"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- Novel Review List Activity -->
         <activity android:name=".activity.NovelReviewListActivity"
             android:label="@string/action_review_list"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- Novel Review New Post Activity -->
         <activity android:name=".activity.NovelReviewNewPostActivity"
             android:label="@string/action_review_new_post"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- Novel Review Reply List Activity -->
         <activity android:name=".activity.NovelReviewReplyListActivity"
             android:label="@string/action_review_reply_list"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- Novel Content Activity (Vertical Old Engine) -->
         <activity android:name=".activity.VerticalReaderActivity"
             android:label="@string/action_old_vertical_reader"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- Novel Content Activity (Horizontal Ver 1) allow multiple instance -->
         <activity android:name=".reader.activity.Wenku8ReaderActivityV1"
             android:label="@string/action_horizontal_reader_v1"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="portrait">
         </activity>
 
         <!-- View Image Detail Activity -->
         <activity android:name=".activity.ViewImageDetailActivity"
             android:label="@string/action_watch_image"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- User Login Activity -->
         <activity android:name=".activity.UserLoginActivity"
             android:label="@string/action_user_login"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- User Info Activity -->
         <activity android:name=".activity.UserInfoActivity"
             android:label="@string/action_user_info"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- Menu Background Selector Activity -->
         <activity android:name=".activity.MenuBackgroundSelectorActivity"
             android:label="@string/action_menu_background_selector"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
         <!-- Menu Background Selector Activity -->
         <activity android:name=".activity.AboutActivity"
             android:label="@string/action_about"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:screenOrientation="unspecified">
         </activity>
 
@@ -137,6 +153,7 @@
         <activity
             android:name="com.nononsenseapps.filepicker.FilePickerActivity"
             android:label="@string/app_name"
+            android:configChanges="orientation|screenLayout|screenSize|navigation|keyboardHidden|uiMode"
             android:theme="@style/FilePickerTheme">
             <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT" />

@@ -22,6 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
             android:clickable="true"
+            app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
             android:background="@color/reader_default_bg_toolbar" />
 
         <LinearLayout

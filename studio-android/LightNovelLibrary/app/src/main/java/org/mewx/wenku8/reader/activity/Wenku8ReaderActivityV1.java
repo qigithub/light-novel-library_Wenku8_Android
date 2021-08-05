@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -22,10 +23,15 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 
 import com.afollestad.materialdialogs.GravityEnum;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -52,6 +58,8 @@ import org.mewx.wenku8.reader.slider.base.OverlappedSlider;
 import org.mewx.wenku8.reader.view.WenkuReaderPageView;
 import org.mewx.wenku8.util.LightNetwork;
 import org.mewx.wenku8.util.LightTool;
+import org.mewx.wenku8.util.ScreenUtil;
+import org.mewx.wenku8.util.ViewHolderLV;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -80,10 +88,26 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
     private WenkuReaderLoader loader;
     private WenkuReaderSettingV1 setting;
 
+    private Toolbar toolbar_actionbar;
+
+    private RelativeLayout reader_top,reader_bot_seeker,reader_bot_settings,layout_font_size;
+    private LinearLayout reader_bot;
+    private LinearLayout btn_daylight,btn_jump,btn_find,btn_config;
+    private TextView text_previous,text_next;
+
+    private DiscreteSeekBar seekerFontSize,
+            seekerLineDistance ,
+            seekerParagraphDistance ,
+            seekerParagraphEdgeDistance ,reader_seekbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initMaterialStyle(R.layout.layout_reader_swipe_temp, BaseMaterialActivity.StatusBarColor.DARK);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        ScreenUtil.setDisplayCutoutCanUse(this);
+        setContentView(R.layout.layout_reader_swipe_temp);
+
+//        initMaterialStyle(R.layout.layout_reader_swipe_temp, BaseMaterialActivity.StatusBarColor.DARK);
+
 
         // fetch values
         aid = getIntent().getIntExtra("aid", 1);
@@ -95,9 +119,55 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
 //        tempNavBarHeight = LightTool.getNavigationBarSize(this).y;
 
         getTintManager().setTintAlpha(0.0f);
-        if(getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(volumeList.volumeName);
-        }
+//        if(getSupportActionBar() != null) {
+//            getSupportActionBar().setTitle(volumeList.volumeName);
+//        }
+
+        seekerFontSize = findViewById(R.id.reader_font_size_seeker);
+        seekerLineDistance = findViewById(R.id.reader_line_distance_seeker);
+        seekerParagraphDistance = findViewById(R.id.reader_paragraph_distance_seeker);
+        seekerParagraphEdgeDistance = findViewById(R.id.reader_paragraph_edge_distance_seeker);
+        reader_top = findViewById(R.id.reader_top);
+
+        reader_bot_seeker = findViewById(R.id.reader_bot_seeker);
+        reader_bot_settings = findViewById(R.id.reader_bot_settings);
+        layout_font_size = findViewById(R.id.layout_font_size);
+        btn_daylight = findViewById(R.id.btn_daylight);
+        btn_jump = findViewById(R.id.btn_jump);
+        btn_find = findViewById(R.id.btn_find);
+        btn_config = findViewById(R.id.btn_config);
+        text_previous = findViewById(R.id.text_previous);
+        text_next = findViewById(R.id.text_next);
+        reader_seekbar = findViewById(R.id.reader_seekbar);
+        reader_bot = findViewById(R.id.reader_bot);
+//        reader_top = findViewById(R.id.reader_top);
+//        reader_top = findViewById(R.id.reader_top);
+        
+        
+        toolbar_actionbar = findViewById(R.id.toolbar_actionbar);
+        toolbar_actionbar.setTitle(volumeList.volumeName);
+        toolbar_actionbar.setTitleTextColor(Color.WHITE);
+        toolbar_actionbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+        toolbar_actionbar.inflateMenu(R.menu.menu_reader_v1);
+
+        toolbar_actionbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+                switch (item.getItemId()) {
+                    case R.id.action_watch_image:
+                        if(sl != null && sl.getAdapter().getCurrentView() != null && ((RelativeLayout) sl.getAdapter().getCurrentView()).getChildAt(0) instanceof WenkuReaderPageView)
+                            ((WenkuReaderPageView) ((RelativeLayout) sl.getAdapter().getCurrentView()).getChildAt(0)).watchImageDetailed(Wenku8ReaderActivityV1.this);
+                        break;
+                }
+                return true;
+            }
+        });
 
         // find views
         mSliderHolder = findViewById(R.id.slider_holder);
@@ -118,7 +188,7 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
         super.onResume();
         MobclickAgent.onResume(this);
 
-        if(findViewById(R.id.reader_bot).getVisibility() != View.VISIBLE)
+        if(reader_bot.getVisibility() != View.VISIBLE)
             hideNavigationBar();
         else
             showNavigationBar();
@@ -156,47 +226,49 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
 
     private void hideNavigationBar() {
         // This work only for android 4.4+
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            // set navigation bar status, remember to disable "setNavigationBarTintEnabled"
-            final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-            getWindow().getDecorView().setSystemUiVisibility(flags);
-
-            // Code below is to handle presses of Volume up or Volume down.
-            // Without this, after pressing volume buttons, the navigation bar will
-            // show up and won't hide
-            final View decorView = getWindow().getDecorView();
-            decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
-                if((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                    decorView.setSystemUiVisibility(flags);
-                }
-            });
-        }
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            // set navigation bar status, remember to disable "setNavigationBarTintEnabled"
+//            final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+//            getWindow().getDecorView().setSystemUiVisibility(flags);
+//
+//            // Code below is to handle presses of Volume up or Volume down.
+//            // Without this, after pressing volume buttons, the navigation bar will
+//            // show up and won't hide
+//            final View decorView = getWindow().getDecorView();
+//            decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
+//                if((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+//                    decorView.setSystemUiVisibility(flags);
+//                }
+//            });
+//        }
+        ScreenUtil.hideNavigationBarAndStatusBar(this);
     }
 
     private void showNavigationBar() {
         // set navigation bar status, remember to disable "setNavigationBarTintEnabled"
-        final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        // This work only for android 4.4+
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            getWindow().getDecorView().setSystemUiVisibility(flags);
-
-            // Code below is to handle presses of Volume up or Volume down.
-            // Without this, after pressing volume buttons, the navigation bar will
-            // show up and won't hide
-            final View decorView = getWindow().getDecorView();
-            decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
-                if((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                    decorView.setSystemUiVisibility(flags);
-                }
-            });
-        }
+//        final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+//        // This work only for android 4.4+
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            getWindow().getDecorView().setSystemUiVisibility(flags);
+//
+//            // Code below is to handle presses of Volume up or Volume down.
+//            // Without this, after pressing volume buttons, the navigation bar will
+//            // show up and won't hide
+//            final View decorView = getWindow().getDecorView();
+//            decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
+//                if((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+//                    decorView.setSystemUiVisibility(flags);
+//                }
+//            });
+//        }
+        ScreenUtil.showNavigationBarAndStatusBar(this);
     }
 
     @Override
@@ -261,8 +333,10 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
             if (contentView == null)
                 contentView = getLayoutInflater().inflate(R.layout.layout_reader_swipe_page, null);
 
+            
             // prevent memory leak
-            final RelativeLayout rl = contentView.findViewById(R.id.page_holder);
+            final RelativeLayout rl = ViewHolderLV.get(contentView,R.id.page_holder);
+//                    contentView.findViewById(R.id.page_holder);
             rl.removeAllViews();
             ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             rl.addView(pageView, lp);
@@ -380,6 +454,7 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
         }
     }
 
+    
 
     class AsyncNovelContentTask extends AsyncTask<ContentValues, Integer, Wenku8Error.ErrorCode> {
         private MaterialDialog md;
@@ -464,8 +539,8 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
                         // first init
                         if(!barStatus) {
                             showNavigationBar();
-                            findViewById(R.id.reader_top).setVisibility(View.VISIBLE);
-                            findViewById(R.id.reader_bot).setVisibility(View.VISIBLE);
+                            reader_top.setVisibility(View.VISIBLE);
+                            reader_bot.setVisibility(View.VISIBLE);
 
                             if (Build.VERSION.SDK_INT >= 16 ) {
                                 getTintManager().setStatusBarAlpha(0.90f);
@@ -475,39 +550,38 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
 
                             if(!isSet) {
                                 // add action to each
-                                findViewById(R.id.btn_daylight).setOnClickListener(v -> {
+                                btn_daylight.setOnClickListener(v -> {
                                     // switch day/night mode
                                     WenkuReaderPageView.switchDayMode();
                                     WenkuReaderPageView.resetTextColor();
                                     mSlidingPageAdapter.restoreState(null, null);
                                     mSlidingPageAdapter.notifyDataSetChanged();
                                 });
-                                findViewById(R.id.btn_daylight).setOnLongClickListener(v -> {
+                                btn_daylight.setOnLongClickListener(v -> {
                                     Toast.makeText(Wenku8ReaderActivityV1.this, getResources().getString(R.string.reader_daynight), Toast.LENGTH_SHORT).show();
                                     return true;
                                 });
 
-                                findViewById(R.id.btn_jump).setOnClickListener(new View.OnClickListener() {
+                                btn_jump.setOnClickListener(new View.OnClickListener() {
                                     boolean isOpen = false;
                                     @Override
                                     public void onClick(View v) {
                                         // show jump dialog
-                                        if(findViewById(R.id.reader_bot_settings).getVisibility() == View.VISIBLE
-                                                || findViewById(R.id.reader_bot_seeker).getVisibility() == View.INVISIBLE) {
+                                        if(reader_bot_settings.getVisibility() == View.VISIBLE
+                                                || reader_bot_seeker.getVisibility() == View.INVISIBLE) {
                                             isOpen = false;
-                                            findViewById(R.id.reader_bot_settings).setVisibility(View.INVISIBLE);
+                                            reader_bot_settings.setVisibility(View.INVISIBLE);
                                         }
                                         if(!isOpen)
-                                            findViewById(R.id.reader_bot_seeker).setVisibility(View.VISIBLE);
+                                            reader_bot_seeker.setVisibility(View.VISIBLE);
                                         else
-                                            findViewById(R.id.reader_bot_seeker).setVisibility(View.INVISIBLE);
+                                            reader_bot_seeker.setVisibility(View.INVISIBLE);
                                         isOpen = !isOpen;
 
-                                        DiscreteSeekBar seeker = findViewById(R.id.reader_seekbar);
-                                        seeker.setMin(1);
-                                        seeker.setProgress(mSlidingPageAdapter.getCurrentFirstLineIndex() + 1); // bug here
-                                        seeker.setMax(loader.getElementCount());
-                                        seeker.setOnProgressChangeListener(new DiscreteSeekBar.OnProgressChangeListener() {
+                                        reader_seekbar.setMin(1);
+                                        reader_seekbar.setProgress(mSlidingPageAdapter.getCurrentFirstLineIndex() + 1); // bug here
+                                        reader_seekbar.setMax(loader.getElementCount());
+                                        reader_seekbar.setOnProgressChangeListener(new DiscreteSeekBar.OnProgressChangeListener() {
                                             @Override
                                             public void onProgressChanged(DiscreteSeekBar discreteSeekBar, int i, boolean b) { }
 
@@ -523,41 +597,37 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
                                         });
                                     }
                                 });
-                                findViewById(R.id.btn_jump).setOnLongClickListener(v -> {
+                                btn_jump.setOnLongClickListener(v -> {
                                     Toast.makeText(Wenku8ReaderActivityV1.this, getResources().getString(R.string.reader_jump), Toast.LENGTH_SHORT).show();
                                     return true;
                                 });
 
-                                findViewById(R.id.btn_find).setOnClickListener(v -> {
+                                btn_find.setOnClickListener(v -> {
                                     // show label page
                                     Toast.makeText(Wenku8ReaderActivityV1.this, "查找功能尚未就绪", Toast.LENGTH_SHORT).show();
                                 });
-                                findViewById(R.id.btn_find).setOnLongClickListener(v -> {
+                                btn_find.setOnLongClickListener(v -> {
                                     Toast.makeText(Wenku8ReaderActivityV1.this, getResources().getString(R.string.reader_find), Toast.LENGTH_SHORT).show();
                                     return true;
                                 });
 
-                                findViewById(R.id.btn_config).setOnClickListener(new View.OnClickListener() {
+                                btn_config.setOnClickListener(new View.OnClickListener() {
                                     private boolean isOpen = false;
                                     @Override
                                     public void onClick(View v) {
                                         // show jump dialog
-                                        if(findViewById(R.id.reader_bot_seeker).getVisibility() == View.VISIBLE
-                                                || findViewById(R.id.reader_bot_settings).getVisibility() == View.INVISIBLE) {
+                                        if(reader_bot_seeker.getVisibility() == View.VISIBLE
+                                                || reader_bot_settings.getVisibility() == View.INVISIBLE) {
                                             isOpen = false;
-                                            findViewById(R.id.reader_bot_seeker).setVisibility(View.INVISIBLE);
+                                            reader_bot_seeker.setVisibility(View.INVISIBLE);
                                         }
                                         if(!isOpen)
-                                            findViewById(R.id.reader_bot_settings).setVisibility(View.VISIBLE);
+                                            reader_bot_settings.setVisibility(View.VISIBLE);
                                         else
-                                            findViewById(R.id.reader_bot_settings).setVisibility(View.INVISIBLE);
+                                            reader_bot_settings.setVisibility(View.INVISIBLE);
                                         isOpen = !isOpen;
 
                                         // set all listeners
-                                        DiscreteSeekBar seekerFontSize = findViewById(R.id.reader_font_size_seeker),
-                                                seekerLineDistance = findViewById(R.id.reader_line_distance_seeker),
-                                                seekerParagraphDistance = findViewById(R.id.reader_paragraph_distance_seeker),
-                                                seekerParagraphEdgeDistance = findViewById(R.id.reader_paragraph_edge_distance_seeker);
 
                                         seekerFontSize.setProgress(setting.getFontSize());
                                         seekerFontSize.setOnProgressChangeListener(new DiscreteSeekBar.OnProgressChangeListener() {
@@ -686,12 +756,12 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
                                                 .show());
                                     }
                                 });
-                                findViewById(R.id.btn_config).setOnLongClickListener(v -> {
+                                btn_config.setOnLongClickListener(v -> {
                                     Toast.makeText(Wenku8ReaderActivityV1.this, getResources().getString(R.string.reader_config), Toast.LENGTH_SHORT).show();
                                     return true;
                                 });
 
-                                findViewById(R.id.text_previous).setOnClickListener(v -> {
+                                text_previous.setOnClickListener(v -> {
                                     // goto previous chapter
                                     for (int i = 0; i < volumeList.chapterList.size(); i++) {
                                         if (cid == volumeList.chapterList.get(i).cid) {
@@ -726,7 +796,7 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
                                     }
                                 });
 
-                                findViewById(R.id.text_next).setOnClickListener(v -> {
+                                text_next.setOnClickListener(v -> {
                                     // goto next chapter
                                     for (int i = 0; i < volumeList.chapterList.size(); i++) {
                                         if (cid == volumeList.chapterList.get(i).cid) {
@@ -765,10 +835,10 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
                         else {
                             // show menu
                             hideNavigationBar();
-                            findViewById(R.id.reader_top).setVisibility(View.INVISIBLE);
-                            findViewById(R.id.reader_bot).setVisibility(View.INVISIBLE);
-                            findViewById(R.id.reader_bot_seeker).setVisibility(View.INVISIBLE);
-                            findViewById(R.id.reader_bot_settings).setVisibility(View.INVISIBLE);
+                            reader_top.setVisibility(View.INVISIBLE);
+                            reader_bot.setVisibility(View.INVISIBLE);
+                            reader_bot_seeker.setVisibility(View.INVISIBLE);
+                            reader_bot_settings.setVisibility(View.INVISIBLE);
                             if (Build.VERSION.SDK_INT >= 16 ) {
                                 getTintManager().setStatusBarAlpha(0.0f);
                                 getTintManager().setNavigationBarAlpha(0.0f);
@@ -1016,5 +1086,16 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(0, R.anim.fade_out);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (toolbar_actionbar == null)
+            return;
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)toolbar_actionbar.getLayoutParams();
+        lp.topMargin = ScreenUtil.getStatusBarHeight(this);
+        toolbar_actionbar.setLayoutParams(lp);
+
     }
 }

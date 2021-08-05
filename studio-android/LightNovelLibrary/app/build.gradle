@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.github.kt3k.coveralls'
 
 android {
-    compileSdkVersion rootProject.targetSdkVersion
+    compileSdkVersion 30
     buildToolsVersion rootProject.buildToolsVersion
     defaultConfig {
         applicationId "org.mewx.wenku8"
-        minSdkVersion 15
+        minSdkVersion 23
         targetSdkVersion rootProject.targetSdkVersion
-        versionCode 44
-        versionName "1.13"
+        versionCode 47
+        versionName "1.20"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {

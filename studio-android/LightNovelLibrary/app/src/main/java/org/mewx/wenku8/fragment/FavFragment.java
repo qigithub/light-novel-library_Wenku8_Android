@@ -74,6 +74,7 @@ public class FavFragment extends Fragment implements MyItemClickListener, MyItem
         // Required empty public constructor
     }
 
+    NovelItemAdapterUpdate adapter;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +102,19 @@ public class FavFragment extends Fragment implements MyItemClickListener, MyItem
 
         mSwipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.myAccentColor));
         mSwipeRefreshLayout.setOnRefreshListener(() -> new AsyncLoadAllCloud().execute(1));
+
+        if (adapter == null)
+            adapter = new NovelItemAdapterUpdate();
+        if (listNovelItemInfo == null)
+            listNovelItemInfo = new ArrayList<>(16);
+//        if (mRecyclerView.getAdapter() == null) {
+//            adapter = new NovelItemAdapterUpdate();
+//        }
+        adapter.RefreshDataset(listNovelItemInfo);
+        adapter.setOnItemClickListener(FavFragment.this);
+        adapter.setOnDeleteClickListener(FavFragment.this);
+        adapter.setOnItemLongClickListener(FavFragment.this);
+        mRecyclerView.setAdapter(adapter);
 
         return rootView;
     }
@@ -264,14 +278,15 @@ public class FavFragment extends Fragment implements MyItemClickListener, MyItem
         }
 
         // Reuse the adapter and datasets.
-        if (mRecyclerView.getAdapter() == null) {
-            NovelItemAdapterUpdate adapter = new NovelItemAdapterUpdate();
-            adapter.RefreshDataset(listNovelItemInfo);
-            adapter.setOnItemClickListener(FavFragment.this);
-            adapter.setOnDeleteClickListener(FavFragment.this);
-            adapter.setOnItemLongClickListener(FavFragment.this);
-            mRecyclerView.setAdapter(adapter);
-        }
+//        if (mRecyclerView.getAdapter() == null) {
+//            NovelItemAdapterUpdate adapter = new NovelItemAdapterUpdate();
+//            adapter.RefreshDataset(listNovelItemInfo);
+//            adapter.setOnItemClickListener(FavFragment.this);
+//            adapter.setOnDeleteClickListener(FavFragment.this);
+//            adapter.setOnItemLongClickListener(FavFragment.this);
+//            mRecyclerView.setAdapter(adapter);
+//        }
+        adapter.RefreshDataset(listNovelItemInfo);
         if (datasetChanged) {
             mRecyclerView.getAdapter().notifyDataSetChanged();
         }

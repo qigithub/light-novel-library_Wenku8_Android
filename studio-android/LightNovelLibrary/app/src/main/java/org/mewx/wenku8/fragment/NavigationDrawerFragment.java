@@ -21,6 +21,8 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.Space;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +41,7 @@ import org.mewx.wenku8.global.GlobalConfig;
 import org.mewx.wenku8.util.LightCache;
 import org.mewx.wenku8.util.LightTool;
 import org.mewx.wenku8.util.LightUserSession;
+import org.mewx.wenku8.util.ScreenUtil;
 
 public class NavigationDrawerFragment extends Fragment {
     private static final String TAG = NavigationDrawerFragment.class.getSimpleName();
@@ -52,10 +55,16 @@ public class NavigationDrawerFragment extends Fragment {
     private RoundedImageView rivUserAvatar;
     private boolean fakeDarkSwitcher = false;
 
+    private View view_top;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.layout_main_menu, container, false);
+        View rootView = inflater.inflate(R.layout.layout_main_menu, container, false);
+        view_top = rootView.findViewById(R.id.view_top);
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view_top.getLayoutParams();
+        lp.height = ScreenUtil.getStatusBarHeight(getContext());
+        view_top.setLayoutParams(lp);
+        return rootView;
     }
 
     private View.OnClickListener generateNavigationButtonOnClickListener(
