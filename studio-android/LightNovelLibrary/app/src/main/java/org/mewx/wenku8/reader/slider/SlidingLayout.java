@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.mewx.wenku8.reader.slider.base.Slider;
+import org.mewx.wenku8.util.ScreenUtil;
 
 /**
  * Created by xuzb on 10/23/14.
@@ -29,6 +30,17 @@ public class SlidingLayout extends ViewGroup {
 
     private Parcelable mRestoredAdapterState = null;
     private ClassLoader mRestoredClassLoader = null;
+
+
+    /**
+     * 0.0463 1080 下是 50px
+     * 0.0278 1080    30
+     * @return
+     */
+    public int getMinOffset(){
+        int sw = ScreenUtil.getRawScreenW(getContext());
+        return (int) (sw * 0.0278);
+    }
 
     /**
      *
@@ -85,8 +97,10 @@ public class SlidingLayout extends ViewGroup {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mSwiped = false;
-                mDownMotionX = (int) event.getX();
-                mDownMotionY = (int) event.getY();
+//                mDownMotionX = (int) event.getX();
+//                mDownMotionY = (int) event.getY();
+                mDownMotionX = (int) event.getRawX();
+                mDownMotionY = (int) event.getRawY();
                 mDownMotionTime = System.currentTimeMillis();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -110,10 +124,13 @@ public class SlidingLayout extends ViewGroup {
 
     private void computeMoveMotion(MotionEvent event) {
 
-        int xDiff = Math.abs((int) event.getX() - mDownMotionX);
-        int yDiff = Math.abs((int) event.getY() - mDownMotionY);
+//        int xDiff = Math.abs((int) event.getX() - mDownMotionX);
+//        int yDiff = Math.abs((int) event.getY() - mDownMotionY);
 
-        if (xDiff > 30 || yDiff > 30 ) {
+        int xDiff = Math.abs((int) event.getRawX() - mDownMotionX);
+        int yDiff = Math.abs((int) event.getRawY() - mDownMotionY);
+
+        if (xDiff >= getMinOffset() || yDiff >= getMinOffset() ) {
             mSwiped = true;
         }
     }
@@ -123,11 +140,15 @@ public class SlidingLayout extends ViewGroup {
             return;
         if (isSwiped()) return;
 
-        int xDiff = Math.abs((int) event.getX() - mDownMotionX);
-        int yDiff = Math.abs((int) event.getY() - mDownMotionY);
+//        int xDiff = Math.abs((int) event.getX() - mDownMotionX);
+//        int yDiff = Math.abs((int) event.getY() - mDownMotionY);
+
+        int xDiff = Math.abs((int) event.getRawX() - mDownMotionX);
+        int yDiff = Math.abs((int) event.getRawY() - mDownMotionY);
+
         long timeDiff = System.currentTimeMillis() - mDownMotionTime;
 
-        if (xDiff < 30 && yDiff < 30 && timeDiff < 300) {
+        if (xDiff < getMinOffset() && yDiff < getMinOffset() && timeDiff < 300) {
             mOnTapListener.onSingleTap(event);
         }
     }

@@ -8,6 +8,7 @@ import android.widget.Scroller;
 
 import org.mewx.wenku8.reader.slider.SlidingAdapter;
 import org.mewx.wenku8.reader.slider.SlidingLayout;
+import org.mewx.wenku8.util.ScreenUtil;
 
 /**
  * Created by xuzb on 1/16/15.
@@ -46,7 +47,8 @@ public class OverlappedSlider extends BaseSlider {
     public void init(SlidingLayout slidingLayout) {
         mSlidingLayout = slidingLayout;
         mScroller = new Scroller(slidingLayout.getContext());
-        screenWidth = slidingLayout.getContext().getResources().getDisplayMetrics().widthPixels;
+        screenWidth = ScreenUtil.getRawScreenH(slidingLayout.getContext());
+//                slidingLayout.getContext().getResources().getDisplayMetrics().widthPixels;
         limitDistance = screenWidth / 3;
     }
 
@@ -85,7 +87,8 @@ public class OverlappedSlider extends BaseSlider {
                 if (!mScroller.isFinished()) {
                     break;
                 }
-                startX = (int) event.getX();
+//                startX = (int) event.getX();
+                startX = (int) event.getRawX();
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -93,9 +96,14 @@ public class OverlappedSlider extends BaseSlider {
                     return false;
                 }
                 if (startX == 0) {
-                    startX = (int) event.getX();
+//                    startX = (int) event.getX();
+                    startX = (int) event.getRawX();
                 }
-                final int distance = startX - (int) event.getX();
+//                final int distance = startX - (int) event.getX();
+                final int distance = startX - (int) event.getRawX();
+                if (Math.abs(distance) < mSlidingLayout.getMinOffset()) {
+                    break;
+                }
                 if (mDirection == MOVE_NO_RESULT) {
                     if (getAdapter().hasNext() && distance > 0) {
                         mDirection = MOVE_TO_LEFT;

@@ -70,6 +70,7 @@ import java.util.List;
  * Novel Reader Engine V1.
  */
 public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
+    private static final String TAG = Wenku8ReaderActivityV1.class.getSimpleName();
     // constant
     static private final String FromLocal = "fav";
 
@@ -509,9 +510,12 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
             Log.d("MewX", "-- 小说获取完成");
 
             // init components
-            loader = new WenkuReaderLoaderXML(nc);
-            setting = new WenkuReaderSettingV1();
+            if (loader == null) {
+                loader = new WenkuReaderLoaderXML(nc);
+            }
             loader.setCurrentIndex(0);
+            if (setting == null)
+                setting = new WenkuReaderSettingV1();
             for(ChapterInfo ci : volumeList.chapterList) {
                 // get chapter name
                 if(ci.cid == cid) {
@@ -520,26 +524,33 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
                 }
             }
 
-            // config sliding layout
-            mSlidingPageAdapter = new SlidingPageAdapter(0, 0);
+            if (mSlidingPageAdapter == null) {
+                // config sliding layout
+                mSlidingPageAdapter = new SlidingPageAdapter(0, 0);
+            }
             WenkuReaderPageView.setViewComponents(loader, setting, false);
             Log.d("MewX", "-- loader, setting 初始化完成");
-            sl = new SlidingLayout(Wenku8ReaderActivityV1.this);
-            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            sl.setAdapter(mSlidingPageAdapter);
-            sl.setSlider(new OverlappedSlider());
+            if (sl == null) {
+                sl = new SlidingLayout(Wenku8ReaderActivityV1.this);
+                sl.setAdapter(mSlidingPageAdapter);
+                sl.setSlider(new OverlappedSlider());
+            }
+
             sl.setOnTapListener(new SlidingLayout.OnTapListener() {
                 boolean barStatus = false;
                 boolean isSet = false;
 
                 @Override
                 public void onSingleTap(MotionEvent event) {
+                    final String t_= "onSingleTap ";
+                    Log.e(TAG,"call ");
                     int screenWidth = getResources().getDisplayMetrics().widthPixels;
                     int screenHeight = getResources().getDisplayMetrics().heightPixels;
                     int x = (int) event.getX();
                     int y = (int) event.getY();
 
                     if(x > screenWidth / 3 && x < screenWidth * 2 / 3 && y > screenHeight / 3 && y < screenHeight * 2 / 3) {
+                        Log.e(TAG,t_+" 点击内部小矩形 ");
                         // first init
                         //点击位置是内部 小矩形
                         if(!barStatus) {
@@ -838,6 +849,7 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
                             }
                         }
                         else {
+                            Log.e(TAG,t_+" 点击内部小矩形 else");
                             // show menu
                             hideNavigationBar();
                             reader_top.setVisibility(View.INVISIBLE);
@@ -855,19 +867,24 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
 
                     //
                     if (x > (screenWidth / 3 ) * 2 ) {
+                        Log.e(TAG,t_+" 点击外部 gotoNextPage 1 ");
                         gotoNextPage();
                     } else if (x <= (screenWidth / 3) ) {
+                        Log.e(TAG,t_+" 点击外部 gotoPreviousPage 1");
                         gotoPreviousPage();
                     }else {
                         if (y > (screenHeight / 3 ) *2 ) {
+                            Log.e(TAG,t_+" 点击外部 gotoNextPage 2 ");
                             gotoNextPage();
                         } else if (y <= screenHeight / 3 ) {
+                            Log.e(TAG,t_+" 点击外部 gotoPreviousPage 2 ");
                             gotoPreviousPage();
                         }
                     }
 
                 }
             });
+            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             mSliderHolder.addView(sl, 0, lp);
             Log.d("MewX", "-- slider创建完毕");
 
@@ -907,11 +924,12 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
 
     private void gotoNextPage() {
         if(mSlidingPageAdapter != null && !mSlidingPageAdapter.hasNext()) {
+            final int chapterListSize =  volumeList.chapterList.size();
             // goto next chapter
-            for (int i = 0; i < volumeList.chapterList.size(); i++) {
+            for (int i = 0; i < chapterListSize; i++) {
                 if (cid == volumeList.chapterList.get(i).cid) {
                     // found self
-                    if (i + 1 >= volumeList.chapterList.size()) {
+                    if (i + 1 >= chapterListSize) {
                         // no more previous
                         Toast.makeText(Wenku8ReaderActivityV1.this, getResources().getString(R.string.reader_already_last_chapter), Toast.LENGTH_SHORT).show();
                     } else {
@@ -948,8 +966,9 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
 
     private void gotoPreviousPage() {
         if(mSlidingPageAdapter != null && !mSlidingPageAdapter.hasPrevious()) {
+            final int chapterListSize =  volumeList.chapterList.size();
             // goto previous chapter
-            for (int i = 0; i < volumeList.chapterList.size(); i++) {
+            for (int i = 0; i < chapterListSize; i++) {
                 if (cid == volumeList.chapterList.get(i).cid) {
                     // found self
                     if (i == 0) {

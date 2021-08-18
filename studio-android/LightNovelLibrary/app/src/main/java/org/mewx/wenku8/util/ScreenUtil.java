@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Build;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+
+import java.lang.ref.WeakReference;
 
 public class ScreenUtil {
     /**
@@ -107,6 +111,61 @@ public class ScreenUtil {
         int resourceId = resources.getIdentifier("status_bar_height"
                 , "dimen", "android");
         int height = resources.getDimensionPixelSize(resourceId);
+        return height;
+    }
+
+
+    public static int getScreenW(Context ctx) {
+        WeakReference<Context> weakReference = new WeakReference<>(ctx);
+        DisplayMetrics displayMetrics = null;
+        displayMetrics = weakReference.get().getResources().getDisplayMetrics();
+        return displayMetrics.widthPixels;
+    }
+
+    public static int getRawScreenW(Context context) {
+        int width = 0, height = 0;
+        final DisplayMetrics metrics = new DisplayMetrics();
+        Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+
+        // For JellyBean 4.2 (API 17) and onward
+        display.getRealMetrics(metrics);
+
+        width = metrics.widthPixels;
+        height = metrics.heightPixels;
+
+        return width;
+    }
+
+    /**
+     * app内可用的分辨率
+     *
+     * @param ctx
+     * @return
+     */
+    public static int getScreenH(Context ctx) {
+        WeakReference<Context> weakReference = new WeakReference<>(ctx);
+        DisplayMetrics displayMetrics = null;
+        displayMetrics = weakReference.get().getResources().getDisplayMetrics();
+        return displayMetrics.heightPixels;
+    }
+
+    /**
+     * 真实的硬件分辨率
+     *
+     * @param context
+     * @return
+     */
+    public static int getRawScreenH(Context context) {
+        int width = 0, height = 0;
+        final DisplayMetrics metrics = new DisplayMetrics();
+        Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
+
+        // For JellyBean 4.2 (API 17) and onward
+        display.getRealMetrics(metrics);
+
+        width = metrics.widthPixels;
+        height = metrics.heightPixels;
         return height;
     }
 }
