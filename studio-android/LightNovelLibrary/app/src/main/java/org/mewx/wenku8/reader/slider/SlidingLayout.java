@@ -30,6 +30,19 @@ public class SlidingLayout extends ViewGroup {
     private Parcelable mRestoredAdapterState = null;
     private ClassLoader mRestoredClassLoader = null;
 
+    /**
+     *
+     * @return true:手指移动过,需要吧点击事件过滤掉
+     */
+    public boolean isSwiped() {
+        return mSwiped;
+    }
+
+    /**
+     *
+     */
+    private boolean mSwiped = false;
+
     public SlidingLayout(Context context) {
         super(context);
     }
@@ -71,13 +84,19 @@ public class SlidingLayout extends ViewGroup {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                mSwiped = false;
                 mDownMotionX = (int) event.getX();
                 mDownMotionY = (int) event.getY();
                 mDownMotionTime = System.currentTimeMillis();
                 break;
+            case MotionEvent.ACTION_MOVE:
+                computeMoveMotion(event);
+
+                break;
 
             case MotionEvent.ACTION_UP:
                 computeTapMotion(event);
+                mSwiped = false;
                 break;
         }
 
@@ -89,15 +108,26 @@ public class SlidingLayout extends ViewGroup {
         this.mOnTapListener = l;
     }
 
+    private void computeMoveMotion(MotionEvent event) {
+
+        int xDiff = Math.abs((int) event.getX() - mDownMotionX);
+        int yDiff = Math.abs((int) event.getY() - mDownMotionY);
+
+        if (xDiff > 30 || yDiff > 30 ) {
+            mSwiped = true;
+        }
+    }
+
     private void computeTapMotion(MotionEvent event) {
         if (mOnTapListener == null)
             return;
+        if (isSwiped()) return;
 
         int xDiff = Math.abs((int) event.getX() - mDownMotionX);
         int yDiff = Math.abs((int) event.getY() - mDownMotionY);
         long timeDiff = System.currentTimeMillis() - mDownMotionTime;
 
-        if (xDiff < 5 && yDiff < 5 && timeDiff < 200) {
+        if (xDiff < 30 && yDiff < 30 && timeDiff < 300) {
             mOnTapListener.onSingleTap(event);
         }
     }

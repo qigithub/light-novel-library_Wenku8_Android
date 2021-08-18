@@ -99,6 +99,8 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
             seekerLineDistance ,
             seekerParagraphDistance ,
             seekerParagraphEdgeDistance ,reader_seekbar;
+
+    private TextView btn_custom_background,btn_custom_font;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,8 +142,10 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
         text_next = findViewById(R.id.text_next);
         reader_seekbar = findViewById(R.id.reader_seekbar);
         reader_bot = findViewById(R.id.reader_bot);
-//        reader_top = findViewById(R.id.reader_top);
-//        reader_top = findViewById(R.id.reader_top);
+        btn_custom_background = findViewById(R.id.btn_custom_background);
+        btn_custom_font = findViewById(R.id.btn_custom_font);
+        //        reader_top = findViewById(R.id.reader_top);
+        //        reader_top = findViewById(R.id.reader_top);
         
         
         toolbar_actionbar = findViewById(R.id.toolbar_actionbar);
@@ -537,6 +541,7 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
 
                     if(x > screenWidth / 3 && x < screenWidth * 2 / 3 && y > screenHeight / 3 && y < screenHeight * 2 / 3) {
                         // first init
+                        //点击位置是内部 小矩形
                         if(!barStatus) {
                             showNavigationBar();
                             reader_top.setVisibility(View.VISIBLE);
@@ -697,7 +702,7 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
                                             }
                                         });
 
-                                        findViewById(R.id.btn_custom_font).setOnClickListener(v1 -> new MaterialDialog.Builder(Wenku8ReaderActivityV1.this)
+                                        btn_custom_font.setOnClickListener(v1 -> new MaterialDialog.Builder(Wenku8ReaderActivityV1.this)
                                                 .theme(WenkuReaderPageView.getInDayMode() ? Theme.LIGHT : Theme.DARK)
                                                 .title(R.string.reader_custom_font)
                                                 .items(R.array.reader_font_option)
@@ -726,7 +731,7 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
                                                 })
                                                 .show());
 
-                                        findViewById(R.id.btn_custom_background).setOnClickListener(v12 -> new MaterialDialog.Builder(Wenku8ReaderActivityV1.this)
+                                        btn_custom_background.setOnClickListener(v12 -> new MaterialDialog.Builder(Wenku8ReaderActivityV1.this)
                                                 .theme(WenkuReaderPageView.getInDayMode() ? Theme.LIGHT : Theme.DARK)
                                                 .title(R.string.reader_custom_background)
                                                 .items(R.array.reader_background_option)
@@ -848,11 +853,19 @@ public class Wenku8ReaderActivityV1 extends BaseMaterialActivity {
                         return;
                     }
 
-                    if (x > screenWidth / 2) {
+                    //
+                    if (x > (screenWidth / 3 ) * 2 ) {
                         gotoNextPage();
-                    } else if (x <= screenWidth / 2) {
+                    } else if (x <= (screenWidth / 3) ) {
                         gotoPreviousPage();
+                    }else {
+                        if (y > (screenHeight / 3 ) *2 ) {
+                            gotoNextPage();
+                        } else if (y <= screenHeight / 3 ) {
+                            gotoPreviousPage();
+                        }
                     }
+
                 }
             });
             mSliderHolder.addView(sl, 0, lp);
